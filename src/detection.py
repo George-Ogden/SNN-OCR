@@ -11,3 +11,9 @@ def detect_lines(image: np.ndarray) -> List[np.ndarray]:
     starts = np.where(diff == 1)[0]
     ends = np.where(diff == -1)[0]
     return [image[start : end + 1] for start, end in zip(starts, ends, strict=True)]
+
+
+def detect_characters(line: np.ndarray) -> List[np.ndarray]:
+    """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain characters."""
+    transposed_characters = detect_lines(line.T)
+    return [character.T for character in transposed_characters]
