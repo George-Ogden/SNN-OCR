@@ -1,13 +1,14 @@
 import cv2
-import numpy as np
 import pytest
 
-
-@pytest.fixture
-def test_image() -> np.ndarray:
-    return cv2.imread("images/test.jpg")
+from .image import Image
 
 
 @pytest.fixture
-def test_bw_image(test_image: np.ndarray) -> np.ndarray:
-    return cv2.cvtColor(test_image, cv2.COLOR_BGR2GRAY) < 128
+def test_image() -> Image:
+    return Image(cv2.imread("images/test.jpg"))
+
+
+@pytest.fixture
+def test_bw_image(test_image: Image) -> Image:
+    return Image(cv2.cvtColor(test_image.image, cv2.COLOR_BGR2GRAY) < 128)
