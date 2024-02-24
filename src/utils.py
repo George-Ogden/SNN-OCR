@@ -15,12 +15,4 @@ def find_in_image(
     method = cv2.TM_SQDIFF_NORMED
 
     result = cv2.matchTemplate(needle, haystack, method)
-
-    # Compute the minimum squared difference
-    mn, _, mnLoc, _ = cv2.minMaxLoc(result)
-
-    # Extract the coordinates of our best match
-    MPx, MPy = mnLoc
-
-    trows, tcols = needle.shape[:2]
-    return np.allclose(mn, 0)
+    return np.allclose(result.min(), 0, atol=1e-5)
