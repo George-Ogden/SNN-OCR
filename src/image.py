@@ -7,24 +7,12 @@ import numpy as np
 
 
 class Image:
-    def __init__(self, image: np.ndarray, parent: Optional[Image] = None):
+    def __init__(self, image: np.ndarray):
         if isinstance(image, Image):
             image = image.image
         self._image = image
-        if parent is None:
-            self._parent = None
-            self._x = self._y = 0
-        else:
-            if isinstance(parent, np.ndarray):
-                parent = Image(parent)
-            location = parent.locate(self.image)
-            if location is None:
-                self._parent = None
-                self._x = self._y = 0
-            else:
-                self._parent = parent
-                self._x, self._y = location
-        self._h, self._w, *_ = self.image.shape
+        self._x = self._y = 0
+        self._h, self._w, *_ = self._image.shape
 
     @property
     def image(self) -> np.ndarray:
@@ -94,16 +82,48 @@ class Image:
     def T(self) -> Image:
         return Image(self.image.T)
 
-    def detect_lines(self) -> List[Image]:
-        """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain lines."""
+    def split_vertically(self) -> List[Segment]:
+        """Takes in a BW image with True data on a False background and returns a list of segments of the same format that are separated by a full horizontal white space in the original image."""
         used_vertical_slices = np.any(self.image, axis=1)
         used_vertical_slices = np.pad(used_vertical_slices, (1, 1), mode="constant")
         diff = np.diff(used_vertical_slices.astype(int))
         starts = np.where(diff == 1)[0]
         ends = np.where(diff == -1)[0]
-        return [Image(self[start : end + 1], self) for start, end in zip(starts, ends, strict=True)]
+        return [
+            Segment(self[start : end + 1], self) for start, end in zip(starts, ends, strict=True)
+        ]
 
-    def detect_characters(self) -> List[Image]:
+    def split_horizontally(self) -> List[Segment]:
+        """Takes in a BW image with True data on a False background and returns a list of segments of the same format that are separated by a full vertical white space in the original image."""
+        return [Segment(segment.T, self) for segment in self.T.split_vertically()]
+
+    def detect_lines(self) -> List[LineSegment]:
+        """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain lines."""
+        return [LineSegment(line.image, self) for line in self.split_vertically()]
+
+
+class Segment(Image):
+    def __init__(self, image: np.ndarray, parent: Image):
+        if isinstance(image, Image):
+            image = image.image
+        self._image = image
+
+        if isinstance(parent, np.ndarray):
+            parent = Image(parent)
+
+        location = parent.locate(self._image)
+        assert location is not None, "Segment not found in parent image."
+        self._parent = parent
+        self._x, self._y = location
+        self._h, self._w, *_ = self._image.shape
+
+
+class LineSegment(Segment):
+    def detect_characters(self) -> List[CharacterSegment]:
         """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain characters."""
         transposed_characters = self.T.detect_lines()
-        return [Image(character.T, self) for character in transposed_characters]
+        return [CharacterSegment(character.T, self) for character in transposed_characters]
+
+
+class CharacterSegment(Segment):
+    ...
