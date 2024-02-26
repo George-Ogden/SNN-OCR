@@ -30,7 +30,7 @@ def test_characters(test_bw_image: Image):
 
 
 def test_trim(test_bw_image: Image):
-    segment = Segment(test_bw_image.image, test_bw_image)
+    segment = Segment(test_bw_image.image, test_bw_image, (0, 0))
     trimmed = segment.trim()
 
     # Check that the trimmed segment is smaller than the original.

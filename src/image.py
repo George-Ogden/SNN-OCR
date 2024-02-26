@@ -101,23 +101,32 @@ class Image:
     def split_vertically(self) -> List[Segment]:
         """Takes in a BW image with True data on a False background and returns a list of segments of the same format that are separated by a full horizontal white space in the original image."""
         used_vertical_slices = np.any(self.image, axis=1)
-        used_vertical_slices = np.pad(used_vertical_slices, (1, 1), mode="constant")
+        used_vertical_slices = np.pad(
+            used_vertical_slices, (1, 1), mode="constant", constant_values=False
+        )
         diff = np.diff(used_vertical_slices.astype(int))
-        starts = np.where(diff == 1)[0]
-        ends = np.where(diff == -1)[0]
-        return [Segment(self[start:end], self) for start, end in zip(starts, ends, strict=True)]
+        starts = sorted(np.where(diff == 1)[0])
+        ends = sorted(np.where(diff == -1)[0])
+        return [
+            Segment(self[start:end], self, (0, start))
+            for start, end in zip(starts, ends, strict=True)
+        ]
 
     def split_horizontally(self) -> List[Segment]:
         """Takes in a BW image with True data on a False background and returns a list of segments of the same format that are separated by a full vertical white space in the original image."""
-        return [Segment(segment.T, self) for segment in self.T.split_vertically()]
+        return [
+            Segment(segment.T.image, self, (segment.y, segment.x))
+            for segment in self.T.split_vertically()
+        ]
 
     def detect_lines(self) -> List[LineSegment]:
         """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain lines."""
-        return [LineSegment(line.image, self) for line in self.split_vertically()]
+        lines = [line.trim() for line in self.split_vertically()]
+        return [LineSegment(line.image, self, (line.x, line.y)) for line in lines]
 
 
 class Segment(Image):
-    def __init__(self, image: np.ndarray, parent: Image):
+    def __init__(self, image: np.ndarray, parent: Image, location: Tuple[int, int]):
         if isinstance(image, Image):
             image = image.image
         self._image = image
@@ -125,25 +134,30 @@ class Segment(Image):
         if isinstance(parent, np.ndarray):
             parent = Image(parent)
 
-        location = parent.locate(self._image)
-        assert location is not None, "Segment not found in parent image."
         self._parent = parent
         self._x, self._y = location
         self._h, self._w, *_ = self._image.shape
 
     def trim(self) -> Segment:
         """Trim the segment to remove any whitespace."""
-        top_segment, *_, bottom_segment = self.split_vertically()
-        left_segment, *_, right_segment = self.split_horizontally()
-        x1, y1, x2, y2 = (left_segment.x1, top_segment.y1, right_segment.x2, bottom_segment.y2)
-        return Segment(self[y1:y2, x1:x2], self._parent)
+        vertical_slices = self.split_vertically()
+        horizontal_slices = self.split_horizontally()
+        top_segment = vertical_slices[0]
+        bottom_segment = vertical_slices[-1]
+        left_segment = horizontal_slices[0]
+        right_segment = horizontal_slices[-1]
+        x1, y1, x2, y2 = left_segment.x1, top_segment.y1, right_segment.x2, bottom_segment.y2
+        return Segment(self[y1:y2, x1:x2], self._parent, (x1, y1))
 
 
 class LineSegment(Segment):
     def detect_characters(self) -> List[CharacterSegment]:
         """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain characters."""
-        transposed_characters = self.T.detect_lines()
-        return [CharacterSegment(character.T, self) for character in transposed_characters]
+        characters = [character.trim() for character in self.split_horizontally()]
+        return [
+            CharacterSegment(character.image, self, (character.x, character.y))
+            for character in characters
+        ]
 
 
 class CharacterSegment(Segment):
