@@ -1,4 +1,4 @@
-from .image import Image
+from .image import CharacterSegment, Image, LineSegment
 
 
 def test_detect_lines(test_bw_image: Image):
@@ -9,6 +9,7 @@ def test_detect_lines(test_bw_image: Image):
 
     # Check that each line appears in the image.
     for line in lines:
+        assert isinstance(line, LineSegment)
         assert line in test_bw_image
 
 
@@ -21,5 +22,6 @@ def test_characters(test_bw_image: Image):
 
     # Check that each character appears in the line and image.
     for character in characters:
+        assert isinstance(character, CharacterSegment)
         assert character in lines[0]
         assert character in test_bw_image
