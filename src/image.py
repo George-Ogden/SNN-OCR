@@ -27,6 +27,22 @@ class Image:
         return self._y
 
     @property
+    def x1(self) -> int:
+        return self._x
+
+    @property
+    def y1(self) -> int:
+        return self._y
+
+    @property
+    def x2(self) -> int:
+        return self._x + self._w
+
+    @property
+    def y2(self) -> int:
+        return self._y + self._h
+
+    @property
     def w(self) -> int:
         return self._w
 
@@ -40,7 +56,7 @@ class Image:
 
     @property
     def x1y1x2y2(self) -> Tuple[int, int, int, int]:
-        return self.x, self.y, self.x + self.w, self.y + self.h
+        return self.x1, self.y1, self.x2, self.y2
 
     def __repr__(self) -> str:
         return f"Image({self.image!r})"
@@ -89,9 +105,7 @@ class Image:
         diff = np.diff(used_vertical_slices.astype(int))
         starts = np.where(diff == 1)[0]
         ends = np.where(diff == -1)[0]
-        return [
-            Segment(self[start : end + 1], self) for start, end in zip(starts, ends, strict=True)
-        ]
+        return [Segment(self[start:end], self) for start, end in zip(starts, ends, strict=True)]
 
     def split_horizontally(self) -> List[Segment]:
         """Takes in a BW image with True data on a False background and returns a list of segments of the same format that are separated by a full vertical white space in the original image."""
@@ -116,6 +130,13 @@ class Segment(Image):
         self._parent = parent
         self._x, self._y = location
         self._h, self._w, *_ = self._image.shape
+
+    def trim(self) -> Segment:
+        """Trim the segment to remove any whitespace."""
+        top_segment, *_, bottom_segment = self.split_vertically()
+        left_segment, *_, right_segment = self.split_horizontally()
+        x1, y1, x2, y2 = (left_segment.x1, top_segment.y1, right_segment.x2, bottom_segment.y2)
+        return Segment(self[y1:y2, x1:x2], self._parent)
 
 
 class LineSegment(Segment):
