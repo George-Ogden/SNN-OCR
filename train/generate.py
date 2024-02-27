@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 from typing import List
 
-from tqdm import trange
+from tqdm import tqdm, trange
 
 data_root = "training_data"
 base_fonts = [
@@ -49,7 +49,7 @@ def get_fonts() -> List[str]:
 
 def generate_images(character: str, number: int):
     fonts = get_fonts()
-    directory = os.path.join(data_root, character)
+    directory = os.path.join(data_root, f"{ord(character):03}")
     os.makedirs(directory, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w") as temp:
         temp.write(character)
@@ -67,4 +67,7 @@ def generate_images(character: str, number: int):
 
 
 if __name__ == "__main__":
-    generate_images("a", 1000)
+    for character in tqdm(
+        r"\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+    ):
+        generate_images(character, 1000)
