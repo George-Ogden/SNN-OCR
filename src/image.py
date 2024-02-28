@@ -124,6 +124,13 @@ class Image:
         lines = [line.trim() for line in self.split_vertically()]
         return [LineSegment(line.image, self, (line.x, line.y)) for line in lines]
 
+    @staticmethod
+    def load(path: str) -> Image:
+        return Image(cv2.imread(path, cv2.IMREAD_GRAYSCALE))
+
+    def save(self, path: str):
+        cv2.imwrite(path, self.image)
+
 
 class Segment(Image):
     def __init__(self, image: np.ndarray, parent: Image, location: Tuple[int, int]):
