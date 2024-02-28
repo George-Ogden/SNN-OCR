@@ -1,4 +1,3 @@
-import cv2
 import pytest
 
 from .image import Image
@@ -6,9 +5,9 @@ from .image import Image
 
 @pytest.fixture
 def test_image() -> Image:
-    return Image(cv2.imread("images/test.jpg"))
+    return Image.load("images/test.jpg")
 
 
 @pytest.fixture
 def test_bw_image(test_image: Image) -> Image:
-    return Image(cv2.cvtColor(test_image.image, cv2.COLOR_BGR2GRAY) < 128)
+    return Image(test_image.image < 128)
