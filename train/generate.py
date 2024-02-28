@@ -3,10 +3,15 @@ import os
 import random
 import shlex
 import subprocess
+import sys
 import tempfile
 from typing import List
 
 from tqdm import tqdm, trange
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from src.image import CharacterSegment, Image
 
 data_root = "training_data"
 base_fonts = [
@@ -63,7 +68,13 @@ def generate_images(character: str, number: int):
                 check=True,
                 capture_output=True,
             )
-        subprocess.run(f"rm {directory}/*.box", shell=True, check=True)
+
+            # Trim image.
+            image = Image.load(f"{directory}/{i:06}.tif")
+            char = CharacterSegment(image.image, image, (0, 0))
+            cropped_char = char.trim()
+            cropped_char.save(f"{directory}/{i:06}.png")
+        subprocess.run(f"rm {directory}/*.box {directory}/*.tif", shell=True, check=True)
 
 
 if __name__ == "__main__":
