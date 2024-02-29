@@ -50,3 +50,21 @@ def test_trim(test_bw_image: Image):
     assert np.any(trimmed.image[-1])
     assert np.any(trimmed.image[:, 0])
     assert np.any(trimmed.image[:, -1])
+
+
+def test_resize_pad(test_bw_image: Image):
+    line = test_bw_image.detect_lines()[0]
+    character = line.detect_characters()[0]
+
+    # Check that the padded character is the correct size.
+    padded = character.resize_pad((128, 128))
+    assert padded.h == 128
+    assert padded.w == 128
+
+    # Check that the padded character starts or ends with zeros.
+    assert (
+        not np.any(padded.image[0])
+        or not np.any(padded.image[-1])
+        or not np.any(padded.image[:, 0])
+        or not np.any(padded.image[:, -1])
+    )
