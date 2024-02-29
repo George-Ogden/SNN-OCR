@@ -61,6 +61,9 @@ def test_resize_pad(test_bw_image: Image):
     assert padded.h == 128
     assert padded.w == 128
 
+    # Check type
+    assert isinstance(padded, CharacterSegment)
+
     # Check that the padded character starts or ends with zeros.
     assert (
         not np.any(padded.image[0])

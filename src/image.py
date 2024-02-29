@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Tuple, Union
 
+Self = "Self"
+
 import cv2
 import numpy as np
 
@@ -145,7 +147,7 @@ class Segment(Image):
         self._x, self._y = location
         self._h, self._w, *_ = self._image.shape
 
-    def trim(self) -> Segment:
+    def trim(self) -> Self:
         """Trim the segment to remove any whitespace."""
         vertical_slices = self.split_vertically()
         horizontal_slices = self.split_horizontally()
@@ -154,7 +156,7 @@ class Segment(Image):
         left_segment = horizontal_slices[0]
         right_segment = horizontal_slices[-1]
         x1, y1, x2, y2 = left_segment.x1, top_segment.y1, right_segment.x2, bottom_segment.y2
-        return Segment(self[y1:y2, x1:x2], self._parent, (x1, y1))
+        return type(self)(self[y1:y2, x1:x2], self._parent, (x1, y1))
 
 
 class LineSegment(Segment):
@@ -168,7 +170,7 @@ class LineSegment(Segment):
 
 
 class CharacterSegment(Segment):
-    def resize_pad(self, target_size: Tuple[int, int]) -> CharacterSegment:
+    def resize_pad(self, target_size: Tuple[int, int]) -> Self:
         """Resize the longest edge and then pad the character with zeros."""
         h, w = target_size
         if self.h > self.w:
@@ -183,7 +185,7 @@ class CharacterSegment(Segment):
         right_padding = w - new_w - left_padding
         top_padding = (h - new_h) // 2
         bottom_padding = h - new_h - top_padding
-        return CharacterSegment(
+        return type(self)(
             np.pad(resized_image, ((top_padding, bottom_padding), (left_padding, right_padding)))
             >= 128,
             self._parent,
