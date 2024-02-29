@@ -1,3 +1,9 @@
+Training outputs
+*.pt
+*.pth
+classes.txt
+checkpoints/
+
 # Output images
 *.png
 *.jpg
