@@ -7,13 +7,13 @@ import sys
 import tempfile
 from typing import List
 
+from config import data_root, num_samples
 from tqdm import tqdm, trange
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.image import CharacterSegment, Image
 
-data_root = "training_data"
 base_fonts = [
     "Arial",
     "Courier New",
@@ -81,4 +81,4 @@ if __name__ == "__main__":
     for character in tqdm(
         r"\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
     ):
-        generate_images(character, 1000)
+        generate_images(character, num_samples)
