@@ -168,4 +168,24 @@ class LineSegment(Segment):
 
 
 class CharacterSegment(Segment):
-    ...
+    def resize_pad(self, target_size: Tuple[int, int]) -> CharacterSegment:
+        """Resize the longest edge and then pad the character with zeros."""
+        h, w = target_size
+        if self.h > self.w:
+            new_h = h
+            new_w = int(self.w * h / self.h)
+        else:
+            new_w = w
+            new_h = int(self.h * w / self.w)
+        resized_image = cv2.resize((self.image.astype(np.uint8) * 255), (new_w, new_h))
+
+        left_padding = (w - new_w) // 2
+        right_padding = w - new_w - left_padding
+        top_padding = (h - new_h) // 2
+        bottom_padding = h - new_h - top_padding
+        return CharacterSegment(
+            np.pad(resized_image, ((top_padding, bottom_padding), (left_padding, right_padding)))
+            >= 128,
+            self._parent,
+            (self.x - left_padding, self.y - top_padding),
+        )
