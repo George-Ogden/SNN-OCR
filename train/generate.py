@@ -7,7 +7,7 @@ import sys
 import tempfile
 from typing import List
 
-from config import data_root, num_samples
+from config import data_root, image_size, num_samples
 from tqdm import tqdm, trange
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -73,7 +73,8 @@ def generate_images(character: str, number: int):
             image = Image.load(f"{directory}/{i:06}.tif")
             char = CharacterSegment(image.image, image, (0, 0))
             cropped_char = char.trim()
-            cropped_char.save(f"{directory}/{i:06}.png")
+            padded_char = cropped_char.resize_pad(image_size)
+            padded_char.save(f"{directory}/{i:06}.png")
         subprocess.run(f"rm {directory}/*.box {directory}/*.tif", shell=True, check=True)
 
 
