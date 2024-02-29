@@ -179,15 +179,17 @@ class CharacterSegment(Segment):
         else:
             new_w = w
             new_h = int(self.h * w / self.w)
-        resized_image = cv2.resize((self.image.astype(np.uint8) * 255), (new_w, new_h))
+        dtype = self.image.dtype
+        resized_image = cv2.resize(self.image.astype(np.uint8), (new_w, new_h))
 
         left_padding = (w - new_w) // 2
         right_padding = w - new_w - left_padding
         top_padding = (h - new_h) // 2
         bottom_padding = h - new_h - top_padding
         return type(self)(
-            np.pad(resized_image, ((top_padding, bottom_padding), (left_padding, right_padding)))
-            >= 128,
+            np.pad(
+                resized_image, ((top_padding, bottom_padding), (left_padding, right_padding))
+            ).astype(dtype),
             self._parent,
             (self.x - left_padding, self.y - top_padding),
         )
