@@ -28,7 +28,13 @@ np.random.seed(0)
 
 # Define a transform
 transform = v2.Compose(
-    [v2.Resize(image_size), v2.Grayscale(), v2.ToTensor(), v2.Normalize((0,), (1,))]
+    [
+        v2.Resize(image_size),
+        v2.Grayscale(),
+        v2.ToImage(),
+        v2.ToDtype(th.float32, scale=True),
+        v2.Normalize((0,), (1,)),
+    ]
 )
 train_transform = v2.Compose(
     [
