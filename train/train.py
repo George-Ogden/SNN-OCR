@@ -57,7 +57,7 @@ train_loader = data_utils.DataLoader(
     data_utils.Subset(train_dataset, train_indices), batch_size=batch_size, shuffle=True
 )
 val_loader = data_utils.DataLoader(
-    data_utils.Subset(val_dataset, val_indices), batch_size=batch_size
+    data_utils.Subset(val_dataset, val_indices), batch_size=1024
 )
 
 # Save dataset information
