@@ -68,9 +68,7 @@ with open(os.path.join(save_directory, "classes.txt"), "w") as f:
 device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
 # Instantiate the network
-model = SpikingNetwork(
-    num_inputs=th.numel(train_dataset[0][0]), num_outputs=len(train_dataset.classes)
-).to(device)
+model = SpikingNetwork(input_size=image_size, num_outputs=len(train_dataset.classes)).to(device)
 loss_fn = nn.CrossEntropyLoss()
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
@@ -87,7 +85,7 @@ for epoch in t1:
         data = data.to(device)
         targets = targets.to(device)
 
-        spk_rec, mem_rec = model(data.view(data.size(0), -1))
+        spk_rec, mem_rec = model(data)
 
         # Initialize the loss & sum over time
         loss = th.zeros((), device=device)
@@ -109,7 +107,7 @@ for epoch in t1:
             data = data.to(device)
             targets = targets.to(device)
 
-            val_spk, _ = model(data.view(data.size(0), -1))
+            val_spk, _ = model(data)
 
             # Calculate accuracy
             _, predicted = val_spk.sum(dim=0).max(1)
