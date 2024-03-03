@@ -39,8 +39,9 @@ train_transform = v2.Compose(
 )
 
 # Load the dataset
-train_dataset = datasets.ImageFolder(data_root, transform=train_transform)
-val_dataset = datasets.ImageFolder(data_root, transform=transform)
+data_path = os.path.join(os.path.dirname(__file__), data_root)
+train_dataset = datasets.ImageFolder(data_path, transform=train_transform)
+val_dataset = datasets.ImageFolder(data_path, transform=transform)
 
 # Create data subsets
 indices = th.randperm(len(train_dataset)).tolist()

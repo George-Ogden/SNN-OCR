@@ -56,7 +56,7 @@ def get_fonts() -> List[str]:
 
 def generate_images(character: str, number: int):
     fonts = get_fonts()
-    directory = os.path.join(data_root, f"{ord(character):03}")
+    directory = os.path.join(os.path.dirname(__file__), data_root, f"{ord(character):03}")
     os.makedirs(directory, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w") as temp:
         temp.write(character)
