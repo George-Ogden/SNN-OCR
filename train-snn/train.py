@@ -7,19 +7,14 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data_utils
 import torchvision.datasets as datasets
-from config import (
-    batch_size,
-    data_root,
-    image_size,
-    learning_rate,
-    num_epochs,
-    save_directory,
-)
 from torchvision.transforms import v2
 from tqdm import tqdm, trange
 
+from config import batch_size, data_root, learning_rate, num_epochs
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.config import image_size, save_directory
 from src.model import SpikingNetwork
 
 # Set random seeds
@@ -44,8 +39,9 @@ train_transform = v2.Compose(
 )
 
 # Load the dataset
-train_dataset = datasets.ImageFolder(data_root, transform=train_transform)
-val_dataset = datasets.ImageFolder(data_root, transform=transform)
+data_path = os.path.join(os.path.dirname(__file__), data_root)
+train_dataset = datasets.ImageFolder(data_path, transform=train_transform)
+val_dataset = datasets.ImageFolder(data_path, transform=transform)
 
 # Create data subsets
 indices = th.randperm(len(train_dataset)).tolist()
