@@ -7,11 +7,13 @@ import sys
 import tempfile
 from typing import List
 
-from config import data_root, image_size, num_samples
 from tqdm import tqdm, trange
+
+from config import data_root, num_samples
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.config import image_size
 from src.image import CharacterSegment, Image
 
 base_fonts = [
