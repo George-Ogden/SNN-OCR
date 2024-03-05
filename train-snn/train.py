@@ -52,9 +52,7 @@ val_indices = indices[int(len(indices) * 0.9) :]
 train_loader = data_utils.DataLoader(
     data_utils.Subset(train_dataset, train_indices), batch_size=batch_size, shuffle=True
 )
-val_loader = data_utils.DataLoader(
-    data_utils.Subset(val_dataset, val_indices), batch_size=1024
-)
+val_loader = data_utils.DataLoader(data_utils.Subset(val_dataset, val_indices), batch_size=1024)
 
 # Save dataset information
 os.makedirs(save_directory, exist_ok=True)
@@ -70,7 +68,7 @@ loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
 
 best_acc = 0
-model_path = os.path.join(save_directory, "model.pth")
+model_path = os.path.join(save_directory, "snn.pth")
 
 t1 = trange(num_epochs, desc="Training", postfix={"Best Accuracy": best_acc})
 for epoch in t1:
