@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from typing import Any, List, Optional, Tuple, Union
 
+from .position import Positionable
+
 Self = "Self"
 
 import cv2
 import numpy as np
 
 
-class Image:
+class Image(Positionable):
     def __init__(self, image: np.ndarray):
         if isinstance(image, Image):
             image = image.image
@@ -19,46 +21,6 @@ class Image:
     @property
     def image(self) -> np.ndarray:
         return self._image
-
-    @property
-    def x(self) -> int:
-        return self._x
-
-    @property
-    def y(self) -> int:
-        return self._y
-
-    @property
-    def x1(self) -> int:
-        return self._x
-
-    @property
-    def y1(self) -> int:
-        return self._y
-
-    @property
-    def x2(self) -> int:
-        return self._x + self._w
-
-    @property
-    def y2(self) -> int:
-        return self._y + self._h
-
-    @property
-    def w(self) -> int:
-        return self._w
-
-    @property
-    def h(self) -> int:
-        return self._h
-
-    @property
-    def xywh(self) -> Tuple[int, int, int, int]:
-        return self.x, self.y, self.w, self.h
-
-    @property
-    def x1y1x2y2(self) -> Tuple[int, int, int, int]:
-        return self.x1, self.y1, self.x2, self.y2
 
     def __repr__(self) -> str:
         return f"Image({self.image!r})"
