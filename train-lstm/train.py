@@ -33,13 +33,13 @@ pad_token = vocab_size - 1
 
 
 def tokenizer(string: str) -> List[int]:
-    return [ord(c) for c in string if ord(c) < vocab_size - 1]
+    return [0] + [ord(c) for c in string if ord(c) < vocab_size - 1]
 
 
 transforms = v2.Compose(
     [
         v2.Lambda(tokenizer),
-        T.Truncate(sequence_length),
+        T.Truncate(sequence_length + 1),
         T.ToTensor(pad_token),
     ]
 )
@@ -84,6 +84,7 @@ for i, batch in t1:
             t2 = tqdm(val_dataloader, desc="Evaluating", leave=False)
             for val_batch in t2:
                 sequence = transforms(val_batch).to(device)
+                sequence[:, 0] = pad_token
                 inputs = sequence[:, :-1]
                 targets = sequence[:, 1:]
 
@@ -97,6 +98,7 @@ for i, batch in t1:
             model.train()
 
     sequence = transforms(batch).to(device)
+    sequence[:, 0] = pad_token
     inputs = sequence[:, :-1]
     targets = sequence[:, 1:]
 
