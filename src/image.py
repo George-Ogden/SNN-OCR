@@ -156,7 +156,8 @@ class Segment(Image):
         left_segment = horizontal_slices[0]
         right_segment = horizontal_slices[-1]
         x1, y1, x2, y2 = left_segment.x1, top_segment.y1, right_segment.x2, bottom_segment.y2
-        return type(self)(self[y1:y2, x1:x2], self._parent, (x1, y1))
+        x, y = x1 + self.x1, y1 + self.y1
+        return type(self)(self[y1:y2, x1:x2], self._parent, (x, y))
 
 
 class LineSegment(Segment):
