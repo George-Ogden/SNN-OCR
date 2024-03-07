@@ -1,3 +1,5 @@
+import itertools
+
 import numpy as np
 
 from .image import CharacterSegment, Image, LineSegment, Segment
@@ -14,6 +16,9 @@ def test_detect_lines(test_bw_image: Image):
         assert isinstance(line, LineSegment)
         assert line in test_bw_image
 
+    # Check that line y pos is increasing.
+    assert np.all([line.y2 < next_line.y1 for line, next_line in itertools.pairwise(lines)])
+
 
 def test_characters(test_bw_image: Image):
     lines = test_bw_image.detect_lines()
@@ -27,6 +32,14 @@ def test_characters(test_bw_image: Image):
         assert isinstance(character, CharacterSegment)
         assert character in lines[0]
         assert character in test_bw_image
+
+    # Check that character x pos is increasing.
+    assert np.all(
+        [
+            character.x2 < next_character.x1
+            for character, next_character in itertools.pairwise(characters)
+        ]
+    )
 
 
 def test_trim(test_bw_image: Image):
