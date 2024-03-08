@@ -4,7 +4,7 @@ from .image import Image
 from .text import LineText
 
 
-def test_resize_pad(test_bw_image: Image):
+def test_linetext(test_bw_image: Image):
     line = test_bw_image.detect_lines()[0]
 
     # Convert to text.
