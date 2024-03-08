@@ -40,3 +40,30 @@ def test_single_block(test_bw_image: Image):
     # Check that the block is positioned correctly.
     assert lines[0].x1 - 5 <= block.x1 <= lines[0].x1
     assert block.y1 == lines[0].y1
+
+
+def test_multiple_blocks(test_complex_bw_image: Image):
+    lines = test_complex_bw_image.detect_lines()
+    blocks = Block.from_lines(lines)
+
+    # Check that the block contains all the lines.
+    assert len(blocks) == 4
+
+    blocks.sort(key=lambda block: block.y1)
+    # Check number of characters is approximately correct.
+    assert 10 < len(blocks[0].stream) < 20
+    assert 20 < len(blocks[1].stream) < 30
+    assert 5 < len(blocks[2].stream) < 15
+    assert 100 < len(blocks[3].stream)
+
+    # Check that there is a single line for the first blocks.
+    for i in range(3):
+        assert np.all([char.spacing.v is None for char in blocks[i].stream])
+
+    # Check that there are 3 distinct sections and 9 distinct lines in the last block.
+    spaces = np.array([char.spacing.v for char in blocks[3].stream if char.spacing.v is not None])
+    assert len(spaces) == 8
+    assert np.count_nonzero(spaces > 0.5) == 2
+    assert np.all(
+        [(np.isclose(space, 0.0, atol=0.2) or np.isclose(space, 1.0, atol=0.2)) for space in spaces]
+    )
