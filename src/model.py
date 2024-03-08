@@ -5,6 +5,7 @@ import snntorch as snn
 import torch as th
 import torch.nn as nn
 
+from .config import classes, num_characters
 from .image import Image
 
 
@@ -57,6 +58,10 @@ class SNN(nn.Module):
 
     @th.no_grad()
     def predict(self, images: List[Image], batch_size: int = 64) -> th.Tensor:
+        if len(classes) != self.num_outputs:
+            raise ValueError(
+                "Number of classes does not match the number of outputs. Please, train the model first."
+            )
         self.eval()
         results = []
         for i in range(0, len(images), batch_size):
@@ -68,7 +73,13 @@ class SNN(nn.Module):
             batch = batch.unsqueeze(1)
             spk, _ = self(batch)
             results.append(spk.sum(dim=0))
-        return th.cat(results)
+        results = th.cat(results)
+
+        logits = th.empty(
+            (*results.shape[:-1], num_characters), device=results.device, dtype=th.float32
+        ).fill_(-th.inf)
+        logits.scatter_(-1, th.tensor(classes, device=results.device).unsqueeze(0), results)
+        return logits
 
 
 # LSTM
