@@ -20,4 +20,4 @@ def test_resize_pad(test_bw_image: Image):
 
     # Check character spacing is approximately correct.
     for char in text.stream[1:]:
-        assert 0 <= char.spacing < 1.2
+        assert 0 <= char.spacing.h < 1.2
