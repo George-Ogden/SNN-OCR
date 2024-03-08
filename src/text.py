@@ -36,9 +36,8 @@ class LineText(Positionable):
         spaces = [right.x1 - left.x2 for left, right in itertools.pairwise(chars)]
         self._spacing = self.aggregate_spacing(spaces)
         self._x, self._y = position
-        self._chars = [CharacterText(char.image) for char in chars]
-        for char, spacing in zip(self._chars[1:], spaces, strict=True):
-            char._spacing = self.expected_spaces(spacing)
+        spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
+        self._chars = [CharacterText(char.image, space) for char, space in zip(chars, spaces)]
 
     @classmethod
     def aggregate_height(cls, heights: List[int]) -> int:
@@ -74,14 +73,28 @@ class LineText(Positionable):
 
 
 class CharacterText:
-    def __init__(self, image: Image, spacing: Optional[float] = None):
+    def __init__(self, image: Image, spacing: Spacing):
         self._image = image
         self._spacing = spacing
 
     @property
-    def spacing(self) -> float:
+    def spacing(self) -> Spacing:
         return self._spacing
 
     @property
     def image(self) -> Image:
         return self._image
+
+
+class Spacing:
+    def __init__(self, horizontal: Optional[float] = None, vertical: Optional[float] = None):
+        self._vertical = vertical
+        self._horizontal = horizontal
+
+    @property
+    def v(self) -> float:
+        return self._vertical
+
+    @property
+    def h(self) -> float:
+        return self._horizontal
