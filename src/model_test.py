@@ -44,3 +44,5 @@ def test_predict(image_model: SNN, test_bw_image: Image):
     ]
     predictions = image_model.predict(characters)
     assert predictions.shape == (len(characters), num_characters)
+    for prediction in predictions:
+        assert th.isfinite(prediction).any()

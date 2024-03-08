@@ -1,7 +1,8 @@
 import numpy as np
 
-from .config import image_size
+from .config import classes, image_size
 from .image import Image
+from .model import LSTM, SNN
 from .text import Block, LineText
 
 
@@ -81,3 +82,15 @@ def test_multiple_blocks(test_complex_bw_image: Image):
         for char in block.stream:
             assert char.image.w == image_size[0]
             assert char.image.h == image_size[1]
+
+
+def test_decoding(test_complex_bw_image: Image, image_model: SNN, language_model: LSTM):
+    lines = test_complex_bw_image.detect_lines()
+    blocks = Block.from_lines(lines)
+    block, *_ = blocks
+
+    text = block.to_str(image_model, language_model)
+    assert isinstance(text, str)
+    assert len(text) >= len(block.stream)
+    for char in text:
+        assert ord(char) in classes
