@@ -72,15 +72,13 @@ class SNN(nn.Module):
             # Add channel dimension.
             batch = batch.unsqueeze(1)
             spk, _ = self(batch)
-            results.append(spk.sum(dim=0))
+            results.append(spk.sum(dim=0).cpu())
         results = th.cat(results)
 
-        logits = th.full(
-            (*results.shape[:-1], num_characters), -th.inf, device=results.device, dtype=th.float32
-        )
+        logits = th.full((*results.shape[:-1], num_characters), -th.inf, dtype=th.float32)
         logits.scatter_(
             -1,
-            th.tensor(classes, device=results.device).expand(results.shape[:-1] + (len(classes),)),
+            th.tensor(classes).expand(results.shape[:-1] + (len(classes),)),
             results,
         )
         return logits

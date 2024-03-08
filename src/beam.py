@@ -8,9 +8,10 @@ class Beam:
         self, beam_size: int, hidden_state: Tuple[th.Tensor, th.Tensor], bos_token: int = 0
     ):
         self.beam_size = beam_size
+        device = hidden_state[0].device
         self._hidden_state = tuple(state.unsqueeze(-2) for state in hidden_state)
-        self._sequences = th.ones((1, 1), dtype=th.long) * bos_token
-        self._log_probs = th.zeros(1, dtype=th.float)
+        self._sequences = th.ones((1, 1), dtype=th.long, device=device) * bos_token
+        self._log_probs = th.zeros(1, dtype=th.float, device=device)
 
     def update(self, delta_log_probs: th.Tensor, hidden: Tuple[th.Tensor, th.Tensor]):
         log_probs = th.unsqueeze(self._log_probs, -1) + th.squeeze(delta_log_probs, -2)
