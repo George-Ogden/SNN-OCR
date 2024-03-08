@@ -93,10 +93,13 @@ class LSTM(nn.Module):
         self, x: th.Tensor, hidden_state: Optional[Tuple[th.Tensor, th.Tensor]] = None
     ) -> Tuple[th.Tensor, th.Tensor]:
         if hidden_state is None:
-            hidden_state = th.tile(self.h0, (1, x.shape[0], 1)), th.tile(
-                self.c0, (1, x.shape[0], 1)
-            )
+            hidden_state = self.hidden_state(x.shape[0])
         x = self.encoder(x)
         x, hidden_state = self.lstm(x, hidden_state)
         x = self.decoder(x)
         return x, hidden_state
+
+    def hidden_state(self, n: int) -> th.Tensor:
+        hidden_state = th.tile(self.h0, (1, n, 1)), th.tile(self.c0, (1, n, 1))
+
+        return hidden_state
