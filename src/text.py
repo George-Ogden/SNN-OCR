@@ -133,7 +133,29 @@ class Block(Positionable):
         language_model.to(device)
         beam = Beam(beam_width, language_model.hidden_state())
 
-        for base_logits in image_logits:
+        for char, base_logits in zip(self.stream, image_logits):
+            # Update with spaces.
+            if char.spacing.v is not None:
+                for _ in range(int(char.spacing.v + 1.5)):
+                    text_logits, hidden = language_model(*beam.batch())
+                    log_probs = th.full_like(text_logits, -np.inf)
+                    log_probs[:, :, ord("\n")] = 0
+                    beam.update(log_probs, hidden)
+
+            spaces = char.spacing.h
+            while spaces > 0.5:
+                if spaces > 4:
+                    code = ord("\t")
+                    spaces -= 4
+                else:
+                    code = ord(" ")
+                    spaces -= 1
+                text_logits, hidden = language_model(*beam.batch())
+                log_probs = th.full_like(text_logits, -np.inf)
+                log_probs[:, :, code] = 0
+                beam.update(log_probs, hidden)
+
+            # Update with text.
             text_logits, hidden = language_model(*beam.batch())
             log_probs = th.log_softmax(text_logits, dim=-1) + th.log_softmax(
                 base_logits.to(device), dim=-1

@@ -16,7 +16,7 @@ class Beam:
     def update(self, delta_log_probs: th.Tensor, hidden: Tuple[th.Tensor, th.Tensor]):
         log_probs = th.unsqueeze(self._log_probs, -1) + th.squeeze(delta_log_probs, -2)
         top_log_probs, indices = th.topk(
-            log_probs.flatten(), k=min(self.beam_size, delta_log_probs.numel())
+            log_probs.flatten(), k=min(self.beam_size, log_probs.numel())
         )
         indices = th.unravel_index(indices, log_probs.shape)
         self.update_hidden(hidden, indices)
