@@ -1,12 +1,12 @@
 import pytest
 import torch as th
 
-from .model import LSTM, SpikingNetwork
+from .model import LSTM, SNN
 
 
 @pytest.fixture
-def snn_model() -> SpikingNetwork:
-    return SpikingNetwork((32, 48), 2)
+def snn_model() -> SNN:
+    return SNN((32, 48), 2)
 
 
 @pytest.fixture
@@ -14,10 +14,10 @@ def model() -> LSTM:
     return LSTM(48)
 
 
-def test_snn_forward(snn_model: SpikingNetwork):
+def test_snn_forward(snn_model: SNN):
     x = th.rand(6, 1, 32, 48)
     output_spk, _ = snn_model(x)
-    assert output_spk.shape == (SpikingNetwork.num_steps, 6, 2)
+    assert output_spk.shape == (SNN.num_steps, 6, 2)
 
 
 def test_lstm_seq_forward(model: LSTM):

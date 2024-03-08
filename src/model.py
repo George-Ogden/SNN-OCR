@@ -6,7 +6,7 @@ import torch.nn as nn
 
 
 # Define Network
-class SpikingNetwork(nn.Module):
+class SNN(nn.Module):
     num_steps = 50
     beta = 0.95
 

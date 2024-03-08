@@ -15,7 +15,7 @@ from config import batch_size, data_root, learning_rate, num_epochs
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import image_size, save_directory
-from src.model import SpikingNetwork
+from src.model import SNN
 
 # Set random seeds
 th.manual_seed(0)
@@ -62,7 +62,7 @@ with open(os.path.join(save_directory, "classes.txt"), "w") as f:
 device = th.device("cuda" if th.cuda.is_available() else "cpu")
 
 # Instantiate the network
-model = SpikingNetwork(input_size=image_size, num_outputs=len(train_dataset.classes)).to(device)
+model = SNN(input_size=image_size, num_outputs=len(train_dataset.classes)).to(device)
 loss_fn = nn.CrossEntropyLoss()
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
