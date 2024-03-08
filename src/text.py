@@ -4,8 +4,12 @@ import itertools
 from typing import List, Optional, Tuple
 
 import numpy as np
+import torch as th
 
+from .beam import Beam
+from .config import beam_width, image_size
 from .image import CharacterSegment, Image, LineSegment
+from .model import LSTM, SNN
 from .position import Positionable
 
 
@@ -119,6 +123,22 @@ class Block(Positionable):
     def spacing(self) -> float:
         return self._line_spacing
 
+    @th.no_grad()
+    def to_str(self, image_model: SNN, language_model: LSTM) -> str:
+        images = [char.image for char in self.stream]
+        image_logits = image_model.predict(images)
+        beam = Beam(beam_width, language_model.hidden_state())
+
+        for base_logits in image_logits:
+            text_logits, hidden = language_model(*beam.batch())
+            log_probs = th.log_softmax(text_logits, dim=-1) + th.log_softmax(base_logits, dim=-1)
+            log_probs -= th.logsumexp(log_probs, dim=-1, keepdim=True)
+
+            beam.update(log_probs, hidden)
+
+        sequence, _ = beam.most_probable()
+        return "".join([chr(char.item()) for char in sequence])
+
 
 class LineText(Positionable):
     def __init__(self, chars: List[CharacterSegment], position: Tuple[int, int]):
@@ -129,7 +149,10 @@ class LineText(Positionable):
             self._spacing = self.aggregate_spacing(spaces)
             self._x, self._y = position
             spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
-        self._chars = [CharacterText(char.image, space) for char, space in zip(chars, spaces)]
+        self._chars = [
+            CharacterText(char.resize_pad(image_size).image, space)
+            for char, space in zip(chars, spaces)
+        ]
 
     @classmethod
     def aggregate_height(cls, heights: List[int]) -> int:

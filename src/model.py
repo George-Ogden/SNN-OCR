@@ -75,10 +75,14 @@ class SNN(nn.Module):
             results.append(spk.sum(dim=0))
         results = th.cat(results)
 
-        logits = th.empty(
-            (*results.shape[:-1], num_characters), device=results.device, dtype=th.float32
-        ).fill_(-th.inf)
-        logits.scatter_(-1, th.tensor(classes, device=results.device).unsqueeze(0), results)
+        logits = th.full(
+            (*results.shape[:-1], num_characters), -th.inf, device=results.device, dtype=th.float32
+        )
+        logits.scatter_(
+            -1,
+            th.tensor(classes, device=results.device).expand(results.shape[:-1] + (len(classes),)),
+            results,
+        )
         return logits
 
 
@@ -110,7 +114,8 @@ class LSTM(nn.Module):
         x = self.decoder(x)
         return x, hidden_state
 
-    def hidden_state(self, n: int) -> th.Tensor:
+    def hidden_state(self, n: Optional[int] = None) -> th.Tensor:
+        if n is None:
+            return (self.h0.squeeze(-2), self.c0.squeeze(-2))
         hidden_state = th.tile(self.h0, (1, n, 1)), th.tile(self.c0, (1, n, 1))
-
         return hidden_state
