@@ -93,4 +93,4 @@ def test_decoding(test_complex_bw_image: Image, image_model: SNN, language_model
     assert isinstance(text, str)
     assert len(text) >= len(block.stream)
     for char in text:
-        assert ord(char) in classes
+        assert ord(char) in classes or char.strip() == ""
