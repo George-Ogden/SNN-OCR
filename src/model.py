@@ -1,8 +1,11 @@
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
+import numpy as np
 import snntorch as snn
 import torch as th
 import torch.nn as nn
+
+from .image import Image
 
 
 # Define Network
@@ -51,6 +54,21 @@ class SNN(nn.Module):
             mem2_rec.append(mem2)
 
         return th.stack(spk2_rec, dim=0), th.stack(mem2_rec, dim=0)
+
+    @th.no_grad()
+    def predict(self, images: List[Image], batch_size: int = 64) -> th.Tensor:
+        self.eval()
+        results = []
+        for i in range(0, len(images), batch_size):
+            batch = th.tensor(
+                np.array([image.image for image in images[i : i + batch_size]], dtype=np.float32),
+                device=self.fc.weight.device,
+            )
+            # Add channel dimension.
+            batch = batch.unsqueeze(1)
+            spk, _ = self(batch)
+            results.append(spk.sum(dim=0))
+        return th.cat(results)
 
 
 # LSTM
