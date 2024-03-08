@@ -143,7 +143,7 @@ class Block(Positionable):
                     beam.update(log_probs, hidden)
 
             spaces = char.spacing.h
-            while spaces > 0.5:
+            while spaces is not None and spaces > 0.5:
                 if spaces > 4:
                     code = ord("\t")
                     spaces -= 4
