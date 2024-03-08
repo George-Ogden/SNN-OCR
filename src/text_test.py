@@ -1,5 +1,6 @@
 import numpy as np
 
+from .config import image_size
 from .image import Image
 from .text import Block, LineText
 
@@ -21,6 +22,8 @@ def test_linetext(test_bw_image: Image):
     # Check character spacing is approximately correct.
     for char in text.stream[1:]:
         assert 0 <= char.spacing.h < 1.2
+        assert char.image.w == image_size[0]
+        assert char.image.h == image_size[1]
 
 
 def test_single_block(test_bw_image: Image):
@@ -40,6 +43,11 @@ def test_single_block(test_bw_image: Image):
     # Check that the block is positioned correctly.
     assert lines[0].x1 - 5 <= block.x1 <= lines[0].x1
     assert block.y1 == lines[0].y1
+
+    # Check all images are resized.
+    for char in block.stream:
+        assert char.image.w == image_size[0]
+        assert char.image.h == image_size[1]
 
 
 def test_multiple_blocks(test_complex_bw_image: Image):
@@ -67,3 +75,9 @@ def test_multiple_blocks(test_complex_bw_image: Image):
     assert np.all(
         [(np.isclose(space, 0.0, atol=0.2) or np.isclose(space, 1.0, atol=0.2)) for space in spaces]
     )
+
+    # Check all images are resized.
+    for block in blocks:
+        for char in block.stream:
+            assert char.image.w == image_size[0]
+            assert char.image.h == image_size[1]
