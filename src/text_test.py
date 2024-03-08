@@ -14,9 +14,9 @@ def test_linetext(test_bw_image: Image):
     assert text.xywh[:2] == line.xywh[:2]
 
     # Check character sizes are approximately correct.
-    assert np.allclose(text.spacing, 3, atol=1)
-    assert np.allclose(text.w, 13, atol=2)
-    assert np.allclose(text.h, 18, atol=3)
+    assert np.isclose(text.spacing, 3, atol=1)
+    assert np.isclose(text.w, 13, atol=2)
+    assert np.isclose(text.h, 18, atol=3)
 
     # Check character spacing is approximately correct.
     for char in text.stream[1:]:
@@ -34,7 +34,7 @@ def test_single_block(test_bw_image: Image):
     assert np.count_nonzero([char.spacing.v is not None for char in block.stream]) == len(lines) - 1
 
     # Check other spacing properties.
-    assert np.allclose(block.spacing, 15, atol=3)
+    assert np.isclose(block.spacing, 15, atol=3)
     assert np.all([char.spacing.h is not None for char in block.stream])
 
     # Check that the block is positioned correctly.
