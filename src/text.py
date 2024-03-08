@@ -15,13 +15,16 @@ class Block(Positionable):
         self._w = self.aggregate_width([char.image.w for line in lines for char in line.stream])
         self._x, self._y = self.aggregate_position([(line.x1, line.y1) for line in lines])
 
-        spaces = [top.y1 - bottom.y2 for bottom, top in itertools.pairwise(lines)]
-        self._line_spacing = self.aggregate_spacing(spaces)
-        spaces = [self.expected_spacing(space) for space in spaces]
-        for line, space in zip(lines, [None] + spaces):
-            line.stream[0]._spacing = Spacing(
-                vertical=space, horizontal=line.expected_spaces(line.x1 - self.x)
-            )
+        if len(lines) > 1:
+            spaces = [top.y1 - bottom.y2 for bottom, top in itertools.pairwise(lines)]
+            self._line_spacing = self.aggregate_spacing(spaces)
+            spaces = [self.expected_spacing(space) for space in spaces]
+            for line, space in zip(lines, [None] + spaces):
+                line.stream[0]._spacing = Spacing(
+                    vertical=space, horizontal=line.expected_spaces(line.x1 - self.x)
+                )
+        else:
+            self._line_spacing = 0
 
         self._chars = [char for line in lines for char in line.stream]
 
@@ -42,7 +45,7 @@ class Block(Positionable):
         lines.sort(key=lambda line: line.h)
         groups = [[lines[0]]]
         for line in lines[1:]:
-            if groups[-1][0].h * 0.8 < line.h:
+            if groups[-1][0].h * 1.2 > line.h:
                 groups[-1].append(line)
             else:
                 groups.append([line])
@@ -61,13 +64,16 @@ class Block(Positionable):
             line_group.sort(key=lambda line: line.y1)
             groups.append([line_group[0]])
             mean_height = line_group[0].h
+            min_spacing = line_group[0].h / 2
             # Keep the lines in the same group if they are close together.
             for line in line_group[1:]:
-                if line.y1 - groups[-1][-1].y2 < mean_height * 3:
+                if line.y1 - groups[-1][-1].y2 < (mean_height + min_spacing) * 3:
                     mean_height = (mean_height * len(groups[-1]) + line.h) / (len(groups[-1]) + 1)
+                    min_spacing = min(min_spacing, line.y1 - groups[-1][-1].y2)
                     groups[-1].append(line)
                 else:
                     mean_height = line.h
+                    min_spacing = line.h / 2
                     groups.append([line])
         return groups
 
@@ -118,10 +124,11 @@ class LineText(Positionable):
     def __init__(self, chars: List[CharacterSegment], position: Tuple[int, int]):
         self._h = self.aggregate_height([char.h for char in chars])
         self._w = self.aggregate_width([char.w for char in chars])
-        spaces = [right.x1 - left.x2 for left, right in itertools.pairwise(chars)]
-        self._spacing = self.aggregate_spacing(spaces)
-        self._x, self._y = position
-        spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
+        if len(chars) > 1:
+            spaces = [right.x1 - left.x2 for left, right in itertools.pairwise(chars)]
+            self._spacing = self.aggregate_spacing(spaces)
+            self._x, self._y = position
+            spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
         self._chars = [CharacterText(char.image, space) for char, space in zip(chars, spaces)]
 
     @classmethod
