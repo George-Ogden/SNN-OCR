@@ -1,7 +1,7 @@
 import pytest
 import torch as th
 
-from .config import image_size
+from .config import classes, image_size
 from .image import Image
 from .model import LSTM, SNN
 
@@ -43,4 +43,4 @@ def test_predict(image_model: SNN, test_bw_image: Image):
         for character in test_bw_image.detect_lines()[0].detect_characters()
     ]
     predictions = image_model.predict(characters)
-    assert predictions.shape == (len(characters), 128)
+    assert predictions.shape == (len(characters), len(classes))

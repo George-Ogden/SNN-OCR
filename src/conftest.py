@@ -1,6 +1,6 @@
 import pytest
 
-from .config import image_size
+from .config import classes, image_size
 from .image import Image
 from .model import SNN
 
@@ -27,4 +27,4 @@ def test_complex_bw_image(test_complex_image: Image) -> Image:
 
 @pytest.fixture
 def image_model() -> SNN:
-    return SNN(input_size=image_size, num_outputs=128)
+    return SNN(input_size=image_size, num_outputs=len(classes))
