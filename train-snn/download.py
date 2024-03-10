@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 
 import kaggle
 
@@ -8,10 +9,12 @@ from config import data_root
 kaggle.api.authenticate()
 directory = os.path.join(os.path.dirname(__file__), data_root)
 
-kaggle.api.dataset_download_files("preatcher/standard-ocr-dataset", path=directory, unzip=True)
+with tempfile.TemporaryDirectory() as temp_dir:
+    kaggle.api.dataset_download_files("preatcher/standard-ocr-dataset", path=temp_dir, unzip=True)
 
-shutil.rmtree(os.path.join(directory, "data2"))
-for split in ("train", "test"):
-    split = f"{split}ing_data"
-    os.rename(os.path.join(directory, "data", split), os.path.join(directory, split))
-os.rmdir(os.path.join(directory, "data"))
+    for split in ("train", "test"):
+        split = f"{split}ing_data"
+        target_directory = os.path.join(directory, split)
+        if os.path.exists(target_directory):
+            shutil.rmtree(target_directory)
+        os.rename(os.path.join(temp_dir, "data", split), target_directory)
