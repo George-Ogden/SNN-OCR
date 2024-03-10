@@ -89,8 +89,11 @@ class Image(Positionable):
         return [LineSegment(line.image, self, (line.x, line.y)) for line in lines]
 
     @staticmethod
-    def load(path: str) -> Image:
-        return Image(cv2.imread(path, cv2.IMREAD_GRAYSCALE))
+    def load(path: str, invert: bool = False) -> Image:
+        image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        if invert:
+            image = 255 - image
+        return Image(image)
 
     def save(self, path: str):
         cv2.imwrite(path, self.image)
