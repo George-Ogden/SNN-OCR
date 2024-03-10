@@ -1,3 +1,4 @@
+kaggle
 numpy
 opencv-python
 snntorch
