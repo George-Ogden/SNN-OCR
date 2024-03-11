@@ -80,7 +80,7 @@ def generate_images(character: str, number: int):
         temp.write(character)
         temp.flush()
 
-        for i in trange(max(number, len(downloaded_images)), leave=False):
+        for i in trange(max(number, len(downloaded_images) + number // 10), leave=False):
             if i < len(downloaded_images):
                 image = Image.load(downloaded_images[i], invert=True)
             else:
@@ -98,12 +98,16 @@ def generate_images(character: str, number: int):
             cropped_char = char.trim()
             padded_char = cropped_char.resize_pad(image_size)
             padded_char.save(f"{directory}/{i:06}.png")
-        subprocess.run(f"rm {directory}/*.box {directory}/*.tif", shell=True, check=True)
+        subprocess.run(f"rm {directory}/*.box {directory}/*.tif", shell=True)
 
 
 if __name__ == "__main__":
     data_path = os.path.join(os.path.dirname(__file__), data_root)
-    download_dirs = [os.path.join(data_path, f"{split}ing_data") for split in ("train", "test")]
+    download_dirs = [
+        os.path.join(data_path, f"{dataset}_{split}ing_data")
+        for dataset in ("kaggle", "EMNIST")
+        for split in ("train", "test")
+    ]
 
     for character in tqdm(
         r"\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
