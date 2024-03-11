@@ -117,6 +117,14 @@ class Image(Positionable):
 
         return Image(image)
 
+    def binarize(self) -> Image:
+        """Convert the image to black and white."""
+        _, image = cv2.threshold(self.image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        image = image == 0
+        if np.count_nonzero(image) > np.count_nonzero(~image):
+            image = ~image
+        return Image(image)
+
     def save(self, path: str):
         cv2.imwrite(path, self.image)
 
