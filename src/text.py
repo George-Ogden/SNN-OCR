@@ -172,10 +172,10 @@ class LineText(Positionable):
     def __init__(self, chars: List[CharacterSegment], position: Tuple[int, int]):
         self._h = self.aggregate_height([char.h for char in chars])
         self._w = self.aggregate_width([char.w for char in chars])
+        self._x, self._y = position
         if len(chars) > 1:
             spaces = [right.x1 - left.x2 for left, right in itertools.pairwise(chars)]
             self._spacing = self.aggregate_spacing(spaces)
-            self._x, self._y = position
             spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
         else:
             spaces = [Spacing()]

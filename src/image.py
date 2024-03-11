@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+import tempfile
 from typing import Any, List, Optional, Tuple, Union
 
 from .position import Positionable
@@ -93,6 +95,26 @@ class Image(Positionable):
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         if invert:
             image = 255 - image
+        return Image(image)
+
+    def preprocess(self) -> Image:
+        """Preprocess the image to make it easier to detect text."""
+        # Use imagemagick's textcleaner.
+        with tempfile.NamedTemporaryFile(suffix=".png") as input_image, tempfile.NamedTemporaryFile(
+            suffix=".png"
+        ) as output_image:
+            cv2.imwrite(input_image.name, self.image)
+            command = f"./scripts/textcleaner -g -u -e stretch -T -s 1 {input_image.name} {output_image.name}"
+            subprocess.run(command, shell=True, check=True)
+            image = cv2.imread(output_image.name, cv2.IMREAD_GRAYSCALE)
+
+        # Increase resolution.
+        image = cv2.resize(image, (0, 0), fx=4, fy=4, interpolation=cv2.INTER_CUBIC)
+
+        # Sharpen image.
+        blur = cv2.GaussianBlur(image, (0, 0), 3)
+        image = cv2.addWeighted(image, 1.5, blur, -0.5, 0)
+
         return Image(image)
 
     def save(self, path: str):
