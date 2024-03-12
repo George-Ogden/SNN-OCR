@@ -58,7 +58,7 @@ def get_fonts() -> List[str]:
     return list(fonts)
 
 
-def generate_images(character: str, number: int):
+def generate_images(character: str):
     fonts = get_fonts()
     directory = os.path.join(data_path, f"{ord(character):03}")
     os.makedirs(directory, exist_ok=True)
@@ -80,7 +80,7 @@ def generate_images(character: str, number: int):
         temp.write(character)
         temp.flush()
 
-        for i in trange(max(number, len(downloaded_images) + number // 10), leave=False):
+        for i in trange(max(num_samples, len(downloaded_images) + num_samples // 5), leave=False):
             if i < len(downloaded_images):
                 image = Image.load(downloaded_images[i], invert=True)
             else:
@@ -112,7 +112,8 @@ if __name__ == "__main__":
     for character in tqdm(
         r"\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~"
     ):
-        generate_images(character, num_samples)
+        generate_images(character)
 
     for directory in download_dirs:
-        shutil.rmtree(directory)
+        if os.path.exists(directory):
+            shutil.rmtree(directory)
