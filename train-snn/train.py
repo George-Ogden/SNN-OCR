@@ -70,7 +70,7 @@ optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
 best_acc = 0
 model_path = os.path.join(save_directory, "snn.pth")
 
-t1 = trange(num_epochs, desc="Training", postfix={"Best Accuracy": best_acc})
+t1 = trange(num_epochs, desc="Training", postfix={"Best Accuracy": best_acc, "Accuracy": 0})
 for epoch in t1:
     # Minibatch training loop
     model.train()
@@ -114,6 +114,6 @@ for epoch in t1:
         if val_acc > best_acc:
             best_acc = val_acc
             th.save(model.state_dict(), model_path)
-            t1.set_postfix({"Best Accuracy": best_acc})
+        t1.set_postfix({"Best Accuracy": best_acc, "Accuracy": val_acc})
 
 print(f"Best accuracy: {best_acc:.2f}%")
