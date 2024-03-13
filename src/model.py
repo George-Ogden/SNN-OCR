@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple
 
+import einops
 import numpy as np
 import snntorch as snn
 import torch as th
@@ -11,7 +12,7 @@ from .image import Image
 
 # Define Network
 class SNN(nn.Module):
-    num_steps = 50
+    num_steps = 16
     beta = 0.95
 
     def __init__(self, input_size: Tuple[int, int], num_outputs: int):
@@ -33,7 +34,7 @@ class SNN(nn.Module):
         with th.no_grad():
             hidden_size = self.conv(th.zeros(1, 1, *input_size)).shape[-1]
 
-        self.fc = nn.Linear(hidden_size, num_outputs)
+        self.fc = nn.Linear(hidden_size, num_outputs * self.num_steps)
         self.lif = snn.Leaky(beta=self.beta)
 
     def forward(self, x):
@@ -45,8 +46,9 @@ class SNN(nn.Module):
         mem_rec = []
 
         hidden = self.fc(self.conv(x))
-        for _ in range(self.num_steps):
-            spk, mem = self.lif(hidden, mem)
+        hidden = einops.rearrange(hidden, "b (h n) -> h b n", h=self.num_steps)
+        for i in range(self.num_steps):
+            spk, mem = self.lif(hidden[i], mem)
             spk_rec.append(spk)
             mem_rec.append(mem)
 
