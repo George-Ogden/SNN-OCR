@@ -33,28 +33,24 @@ class SNN(nn.Module):
         with th.no_grad():
             hidden_size = self.conv(th.zeros(1, 1, *input_size)).shape[-1]
 
-        self.lif1 = snn.Leaky(beta=self.beta)
         self.fc = nn.Linear(hidden_size, num_outputs)
-        self.lif2 = snn.Leaky(beta=self.beta)
+        self.lif = snn.Leaky(beta=self.beta)
 
     def forward(self, x):
         # Initialize hidden states at t=0
-        mem1 = self.lif1.init_leaky()
-        mem2 = self.lif2.init_leaky()
+        mem = self.lif.init_leaky()
 
         # Record the final layer
-        spk2_rec = []
-        mem2_rec = []
+        spk_rec = []
+        mem_rec = []
 
-        for step in range(self.num_steps):
-            cur1 = self.conv(x)
-            spk1, mem1 = self.lif1(cur1, mem1)
-            cur2 = self.fc(spk1)
-            spk2, mem2 = self.lif2(cur2, mem2)
-            spk2_rec.append(spk2)
-            mem2_rec.append(mem2)
+        hidden = self.fc(self.conv(x))
+        for _ in range(self.num_steps):
+            spk, mem = self.lif(hidden, mem)
+            spk_rec.append(spk)
+            mem_rec.append(mem)
 
-        return th.stack(spk2_rec, dim=0), th.stack(mem2_rec, dim=0)
+        return th.stack(spk_rec, dim=0), th.stack(mem_rec, dim=0)
 
     @th.no_grad()
     def predict(self, images: List[Image], batch_size: int = 64) -> th.Tensor:
