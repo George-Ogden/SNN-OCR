@@ -67,10 +67,10 @@ loss_fn = nn.CrossEntropyLoss()
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.999))
 
-best_acc = 0
+best_loss = float("inf")
 model_path = os.path.join(save_directory, "snn.pth")
 
-t1 = trange(num_epochs, desc="Training", postfix={"Best Accuracy": best_acc, "Accuracy": 0})
+t1 = trange(num_epochs, desc="Training", postfix={"Best Val Loss": best_loss, "Loss": 0})
 for epoch in t1:
     # Minibatch training loop
     model.train()
@@ -92,8 +92,8 @@ for epoch in t1:
 
         t2.set_postfix({"Loss": loss.item()})
 
-    total = 0
-    correct = 0
+    count = 0
+    total_loss = 0
     model.eval()
     t2 = tqdm(val_loader, desc="Evaluating", leave=False)
     with th.no_grad():
@@ -103,17 +103,18 @@ for epoch in t1:
 
             val_spk, _ = model(data)
 
-            # Calculate accuracy
-            _, predicted = val_spk.sum(dim=0).max(1)
-            total += targets.size(0)
-            correct += (predicted == targets).sum().item()
-            t2.set_postfix({"Accuracy": correct / total})
+            # Calculate Loss
+            predicted = val_spk.sum(dim=0)
+            loss = loss_fn(th.log(predicted + 1e-6), targets).item()
+            total_loss += loss * targets.size(0)
+            count += targets.size(0)
+            t2.set_postfix({"Loss": loss})
 
-        val_acc = 100 * correct / total
+        val_loss = total_loss / count
 
-        if val_acc > best_acc:
-            best_acc = val_acc
+        if val_loss < best_loss:
+            best_loss = val_loss
             th.save(model.state_dict(), model_path)
-        t1.set_postfix({"Best Accuracy": best_acc, "Accuracy": val_acc})
+        t1.set_postfix({"Best Loss": best_loss, "Val Loss": val_loss})
 
-print(f"Best accuracy: {best_acc:.2f}%")
+print(f"Best Loss: {best_loss:.2f}%")
