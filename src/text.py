@@ -178,6 +178,7 @@ class LineText(Positionable):
             self._spacing = self.aggregate_spacing(spaces)
             spaces = [Spacing()] + [Spacing(self.expected_spaces(space)) for space in spaces]
         else:
+            self._spacing = 0
             spaces = [Spacing()]
         self._chars = [
             CharacterText(char.resize_pad(image_size).image, space)

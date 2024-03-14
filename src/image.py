@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import subprocess
 import tempfile
 from typing import Any, List, Optional, Tuple, Union
@@ -88,7 +89,11 @@ class Image(Positionable):
     def detect_lines(self) -> List[LineSegment]:
         """Takes in a BW image with True text on a False background and returns a list of cropped images of the same format that contain lines."""
         lines = [line.trim() for line in self.split_vertically()]
-        return [LineSegment(line.image, self, (line.x, line.y)) for line in lines]
+        return [
+            LineSegment(line.image, self, (line.x, line.y))
+            for line in lines
+            if line.h > 0 and line.w > 0
+        ]
 
     @staticmethod
     def load(path: str, invert: bool = False) -> Image:
@@ -162,6 +167,7 @@ class LineSegment(Segment):
         return [
             CharacterSegment(character.image, self, (character.x, character.y))
             for character in characters
+            if character.h > 0 and character.w > 0
         ]
 
 
@@ -171,10 +177,10 @@ class CharacterSegment(Segment):
         h, w = target_size
         if self.h > self.w:
             new_h = h
-            new_w = int(self.w * h / self.h)
+            new_w = math.ceil(self.w * h / self.h)
         else:
             new_w = w
-            new_h = int(self.h * w / self.w)
+            new_h = math.ceil(self.h * w / self.w)
         dtype = self.image.dtype
         resized_image = cv2.resize(self.image.astype(np.uint8), (new_w, new_h))
 
