@@ -29,6 +29,7 @@ class SNN(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(2, 2),
             nn.Flatten(),
+            nn.Dropout(0.2),
         )
 
         with th.no_grad():
