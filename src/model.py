@@ -12,7 +12,7 @@ from .image import Image
 
 # Define Network
 class SNN(nn.Module):
-    num_steps = 16
+    num_steps = 10
     beta = 0.95
 
     def __init__(self, input_size: Tuple[int, int], num_outputs: int):
@@ -34,8 +34,10 @@ class SNN(nn.Module):
 
         with th.no_grad():
             hidden_size = self.conv(th.zeros(1, 1, *input_size)).shape[-1]
+            assert 0 <= hidden_size < 1024
 
         self.fc = nn.Linear(hidden_size, num_outputs * self.num_steps)
+        assert 0 <= num_outputs * self.num_steps < 1024
         self.lif = snn.Leaky(beta=self.beta)
 
     def forward(self, x):
