@@ -8,7 +8,7 @@ from .model import LSTM, SNN
 
 @pytest.fixture
 def snn_model() -> SNN:
-    return SNN((32, 48), 2)
+    return SNN((32, 28), 2)
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def lstm_model() -> LSTM:
 
 
 def test_snn_forward(snn_model: SNN):
-    x = th.rand(6, 1, 32, 48)
+    x = th.rand(6, 1, 32, 28)
     output_spk, _ = snn_model(x)
     assert output_spk.shape == (SNN.num_steps, 6, 2)
 

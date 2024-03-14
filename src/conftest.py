@@ -7,7 +7,7 @@ from .model import LSTM, SNN
 
 @pytest.fixture
 def test_image() -> Image:
-    return Image.load("images/test.jpg")
+    return Image.load("tests/test.jpg")
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def test_bw_image(test_image: Image) -> Image:
 
 @pytest.fixture
 def test_complex_image() -> Image:
-    return Image.load("images/test.png")
+    return Image.load("tests/test.png")
 
 
 @pytest.fixture
