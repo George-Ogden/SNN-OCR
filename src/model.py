@@ -73,7 +73,8 @@ class SNN(nn.Module):
             # Add channel dimension.
             batch = batch.unsqueeze(1)
             spk, _ = self(batch)
-            results.append(spk.sum(dim=0).cpu())
+            log_probs = th.log(spk.sum(dim=0) + 1e-3)
+            results.append(log_probs.cpu())
         results = th.cat(results)
 
         logits = th.full((*results.shape[:-1], num_characters), -th.inf, dtype=th.float32)
