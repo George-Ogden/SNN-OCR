@@ -118,7 +118,7 @@ for epoch in t1:
 
             # Calculate Loss
             predicted = val_spk.sum(dim=0)
-            loss = loss_fn(th.log(predicted + 1e-6), targets).item()
+            loss = loss_fn(th.log(predicted + 1e-3), targets).item()
             total_loss += loss * targets.size(0)
             count += targets.size(0)
             t2.set_postfix({"Loss": loss})
