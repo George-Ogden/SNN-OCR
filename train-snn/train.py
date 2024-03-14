@@ -34,7 +34,20 @@ transform = v2.Compose(
 train_transform = v2.Compose(
     [
         transform,
-        v2.AutoAugment(v2.AutoAugmentPolicy.CIFAR10),
+        v2.RandomAdjustSharpness(0.5),
+        v2.RandomApply(
+            [
+                v2.GaussianBlur(5),
+            ]
+        ),
+        v2.RandomChoice(
+            [
+                v2.RandomPerspective(),
+                v2.RandomResizedCrop(image_size, scale=(0.8, 1.0)),
+                v2.RandomAffine(10, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=10),
+            ]
+        ),
+        v2.RandomErasing(),
     ]
 )
 
