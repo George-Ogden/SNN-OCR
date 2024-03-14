@@ -130,4 +130,4 @@ for epoch in t1:
             th.save(model.state_dict(), model_path)
         t1.set_postfix({"Best Loss": best_loss, "Val Loss": val_loss})
 
-print(f"Best Loss: {best_loss:.2f}%")
+print(f"Best Loss: {best_loss:.3f}")
