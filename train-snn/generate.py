@@ -80,7 +80,7 @@ def generate_images(character: str):
         temp.write(character)
         temp.flush()
 
-        for i in trange(max(num_samples, len(downloaded_images) + num_samples // 5), leave=False):
+        for i in trange(max(num_samples, len(downloaded_images)), leave=False):
             if i < len(downloaded_images):
                 image = Image.load(downloaded_images[i], invert=True)
             else:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     data_path = os.path.join(os.path.dirname(__file__), data_root)
     download_dirs = [
         os.path.join(data_path, f"{dataset}_{split}ing_data")
-        for dataset in ("kaggle", "EMNIST")
+        for dataset in ("kaggle",)
         for split in ("train", "test")
     ]
 
