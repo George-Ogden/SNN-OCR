@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import torch as th
@@ -7,10 +8,19 @@ from src.image import Image
 from src.model import LSTM, SNN
 from src.text import Block
 
-if __name__ == "__main__":
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Recognize text in an image.")
+    parser.add_argument("filename", type=str, help="The filename of the image.")
+    return parser.parse_args()
+
+
+def main(args: argparse.Namespace):
     # Load the image.
-    image = Image.load("images/test.png")
-    image = Image(image.image < 128)
+    filename = args.filename
+    image = Image.load(filename)
+    image = image.preprocess()
+    image = image.binarize()
 
     # Detect the lines.
     lines = image.detect_lines()
@@ -33,3 +43,8 @@ if __name__ == "__main__":
     for block in blocks:
         text = block.to_str(language_model=language_model, image_model=image_model)
         print(text)
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
