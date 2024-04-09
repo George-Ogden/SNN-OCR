@@ -3,6 +3,7 @@ Training outputs
 *.pth
 classes.txt
 checkpoints/
+*.zip
 
 # Output images
 *.png
