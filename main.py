@@ -36,7 +36,8 @@ def main(args: argparse.Namespace):
         th.load(os.path.join(save_directory, "lstm.pth"), map_location=th.device("cpu"))
     )
     image_model.load_state_dict(
-        th.load(os.path.join(save_directory, "snn.pth"), map_location=th.device("cpu"))
+        th.load(os.path.join(save_directory, "snn.pth"), map_location=th.device("cpu")),
+        strict=False,
     )
 
     # Predict the text.
