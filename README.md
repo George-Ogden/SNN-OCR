@@ -33,7 +33,7 @@ Which Can inClude photos, videos, links, text, hashtags, and mentions inke
 ### Additional Installation
 You'll need the following additional libraries:
 ```bash
-sudo apt install tesseract textmagick
+sudo apt install tesseract-ocr imagemagick
 ```
 ### Train the SNN
 1. Generate a synthetic dataset
