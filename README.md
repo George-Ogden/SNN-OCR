@@ -5,6 +5,7 @@ Clone the repository and install the requirements.
 ```bash
 git clone https://github.com/George-Ogden/SNN-OCR
 cd SNN-OCR
+sudo apt install imagemagick
 pip install -r requirements.txt
 ```
 ### Download Weights
